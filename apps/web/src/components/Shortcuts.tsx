@@ -22,7 +22,7 @@ const ROWS: [string, string, string][] = [
   ['Results', 'S', 'Same seed'],
   ['Results', 'M', 'Retry mistakes'],
   ['Results', 'R', 'Review'],
-  ['Anywhere but a text field', '?', 'This table'],
+  ['Anywhere', '?', 'This table'],
 ]
 
 export function Shortcuts({ onClose }: { onClose: () => void }): JSX.Element {

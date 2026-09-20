@@ -21,7 +21,7 @@ describe('Shortcuts', () => {
     const rows = screen.getAllByRole('row').slice(1)
     expect(rows.length).toBeGreaterThanOrEqual(18)
     expect(screen.getByText('Mixed-number separator (2␣1/4) — never skips')).toBeTruthy()
-    expect(screen.getByText('Anywhere but a text field')).toBeTruthy()
+    expect(screen.getAllByText('Anywhere').length).toBeGreaterThanOrEqual(2)
     fireEvent.click(screen.getByTestId('shortcuts-close'))
     expect(onClose).toHaveBeenCalledOnce()
     fireEvent.click(screen.getByLabelText('Close'))
