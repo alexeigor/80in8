@@ -151,7 +151,7 @@ export function History(): JSX.Element {
 
           {/* A single run is a dot, not a trend. The heading waits for the chart. */}
           {points.length >= 2 ? (
-            <div data-testid="trend-section">
+            <div class="stack" data-testid="trend-section">
               <h2 class="small muted">Score over time</h2>
               <Trend points={points} />
             </div>
@@ -196,7 +196,7 @@ export function History(): JSX.Element {
             </table>
           </section>
 
-          <section class="scroller">
+          <section class="scroller stack">
             <h2 class="small muted">Accuracy by category (last 20 runs)</h2>
             <table data-testid="kind-table">
               <thead>
@@ -243,7 +243,7 @@ export function History(): JSX.Element {
         </>
       )}
 
-      <section class="card">
+      <section class="card stack">
         <h2 class="small muted">Your data</h2>
         <div class="row">
           <button type="button" data-testid="export" onClick={downloadExport}>

@@ -18,6 +18,11 @@
   --good: #7ee787;
   --focus: #58a6ff;
   --radius: 12px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
   --shadow: 0 1px 2px rgb(0 0 0 / 0.4);
   --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, system-ui, sans-serif;
@@ -87,15 +92,25 @@ h3 {
   margin: 0;
 }
 
+p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Shared spacing for headings, text and actions, including hidden file inputs. */
+.stack > :not(.sr-only) ~ :not(.sr-only) {
+  margin-block-start: var(--space-4);
+}
+
 .page {
   width: min(100%, 60rem);
   margin: 0 auto;
-  padding: 24px 16px calc(24px + env(safe-area-inset-bottom));
-  padding-left: max(16px, env(safe-area-inset-left));
-  padding-right: max(16px, env(safe-area-inset-right));
+  padding: var(--space-6) var(--space-4) calc(var(--space-6) + env(safe-area-inset-bottom));
+  padding-left: max(var(--space-4), env(safe-area-inset-left));
+  padding-right: max(var(--space-4), env(safe-area-inset-right));
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--space-6);
   flex: 1;
 }
 
@@ -118,7 +133,7 @@ h3 {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 16px;
+  gap: var(--space-4);
   flex-wrap: wrap;
 }
 
@@ -136,7 +151,7 @@ h3 {
 
 .navlinks {
   display: flex;
-  gap: 14px;
+  gap: var(--space-3);
   font-size: 0.9rem;
 }
 
@@ -183,7 +198,7 @@ button:disabled {
 
 .row {
   display: flex;
-  gap: 10px;
+  gap: var(--space-3);
   flex-wrap: wrap;
   align-items: center;
 }
@@ -192,13 +207,13 @@ button:disabled {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  padding: 16px;
+  padding: var(--space-4);
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-2);
   min-width: 0;
 }
 
@@ -234,15 +249,23 @@ input[type="number"] {
 .grid2 {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  gap: 14px;
+  gap: var(--space-4);
 }
 
-/* WebKit's native menu label can overflow its box when text is enlarged. */
-.settings-page select {
+/* Keep the native menu, with a consistent field and chevron across browsers.
+   WebKit's default appearance can overflow its box when text is enlarged. */
+select {
+  appearance: none;
   min-width: 0;
   max-width: 100%;
+  padding-right: 36px;
   overflow: hidden;
   text-overflow: ellipsis;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: right 17px center, right 12px center;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
 }
 
 .segmented {
@@ -273,9 +296,9 @@ input[type="number"] {
 .setting-toggle {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 52px;
-  gap: 16px;
+  gap: var(--space-4);
   align-items: start;
-  padding: 16px 0;
+  padding: var(--space-4) 0;
   color: var(--text);
   font-size: 1rem;
   line-height: 1.5;
@@ -284,6 +307,10 @@ input[type="number"] {
 
 .setting-toggle + .setting-toggle {
   border-top: 1px solid var(--line);
+}
+
+.setting-toggle:first-child {
+  padding-top: 0;
 }
 
 .setting-toggle:last-child {
@@ -305,7 +332,7 @@ input[type="number"] {
 }
 
 .setting-toggle-hint {
-  margin-top: 3px;
+  margin-top: var(--space-1);
   color: var(--muted);
   font-size: 0.85rem;
 }
@@ -751,17 +778,18 @@ input.answer {
 .stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 10px;
+  gap: var(--space-3);
 }
 
 .stat {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  padding: 12px;
+  padding: var(--space-3);
 }
 
 .stat .k {
+  margin-bottom: var(--space-1);
   font-size: 0.78rem;
   color: var(--muted);
   text-transform: uppercase;
@@ -812,13 +840,13 @@ td.num {
 .review {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-4);
 }
 
 .review-row {
   display: grid;
   grid-template-columns: 2.5rem 1fr auto;
-  gap: 10px;
+  gap: var(--space-3);
   align-items: center;
   padding: 8px 10px;
   border: 1px solid var(--line);
@@ -874,7 +902,7 @@ td.num {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 14px;
-  padding: 18px;
+  padding: var(--space-4);
   width: min(100%, 34rem);
   max-height: 85dvh;
   overflow: auto;

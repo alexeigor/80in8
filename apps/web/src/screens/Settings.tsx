@@ -87,7 +87,7 @@ export function SettingsScreen(): JSX.Element {
         </p>
       ) : null}
 
-      <section class="card">
+      <section class="card stack">
         <h2 class="small muted">Test</h2>
         <div class="grid2">
           <div class="field">
@@ -153,52 +153,56 @@ export function SettingsScreen(): JSX.Element {
         </div>
       </section>
 
-      <fieldset class="card" aria-labelledby="input-settings-title">
+      <fieldset class="card stack" aria-labelledby="input-settings-title">
         <h2 class="small muted" id="input-settings-title">
           Input
         </h2>
-        <Toggle
-          label="On-screen keypad"
-          hint="Keeps the OS keyboard closed; the physical keyboard still works."
-          field="keypad"
-        />
-        <Toggle
-          label="Auto-submit"
-          hint={
-            profile?.allowAutoSubmit
-              ? 'Zetamac style: advance as soon as the typed value matches.'
-              : 'Only available on drill profiles, where a wrong keystroke costs nothing.'
-          }
-          field="autoSubmit"
-          disabled={!profile?.allowAutoSubmit}
-        />
-        <Toggle label="Stacked fractions" field="stackedFractions" />
+        <div>
+          <Toggle
+            label="On-screen keypad"
+            hint="Keeps the OS keyboard closed; the physical keyboard still works."
+            field="keypad"
+          />
+          <Toggle
+            label="Auto-submit"
+            hint={
+              profile?.allowAutoSubmit
+                ? 'Zetamac style: advance as soon as the typed value matches.'
+                : 'Only available on drill profiles, where a wrong keystroke costs nothing.'
+            }
+            field="autoSubmit"
+            disabled={!profile?.allowAutoSubmit}
+          />
+          <Toggle label="Stacked fractions" field="stackedFractions" />
+        </div>
       </fieldset>
 
-      <fieldset class="card" aria-labelledby="run-settings-title">
+      <fieldset class="card stack" aria-labelledby="run-settings-title">
         <h2 class="small muted" id="run-settings-title">
           During a run
         </h2>
-        <Toggle
-          label="Answer feedback"
-          hint="A ✓ or ✗ in the top bar. Turn off for exam realism."
-          field="feedback"
-        />
-        <Toggle label="Live score" field="showLiveScore" />
-        <Toggle label="Sound" hint="A short tone on each answer and at ten seconds." field="sound" />
-        <Toggle
-          label="Announce the time"
-          hint="Polite screen-reader announcements at 4:00, 2:00, 1:00, 0:30 and 0:10."
-          field="announceTimer"
-        />
-        <Toggle
-          label="Reduce motion"
-          hint="Drops the fades and the shake. Already on whenever your system asks for it."
-          field="reducedMotion"
-        />
+        <div>
+          <Toggle
+            label="Answer feedback"
+            hint="A ✓ or ✗ in the top bar. Turn off for exam realism."
+            field="feedback"
+          />
+          <Toggle label="Live score" field="showLiveScore" />
+          <Toggle label="Sound" hint="A short tone on each answer and at ten seconds." field="sound" />
+          <Toggle
+            label="Announce the time"
+            hint="Polite screen-reader announcements at 4:00, 2:00, 1:00, 0:30 and 0:10."
+            field="announceTimer"
+          />
+          <Toggle
+            label="Reduce motion"
+            hint="Drops the fades and the shake. Already on whenever your system asks for it."
+            field="reducedMotion"
+          />
+        </div>
       </fieldset>
 
-      <section class="card">
+      <section class="card stack">
         <h2 class="small muted">Data</h2>
         <p class="muted small" data-testid="usage">
           Stored on this device: {usage}. Nothing is ever uploaded.{' '}
@@ -232,7 +236,7 @@ export function SettingsScreen(): JSX.Element {
         </div>
       </section>
 
-      <section class="card">
+      <section class="card stack">
         <h2 class="small muted">App</h2>
         <p class="muted small" data-testid="version">
           Version {__APP_VERSION__} · build {__BUILD_ID__}

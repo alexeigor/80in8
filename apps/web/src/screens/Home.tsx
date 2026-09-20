@@ -63,7 +63,7 @@ export function Home(): JSX.Element {
     <main class="page" data-testid="home">
       <Masthead />
 
-      <section>
+      <section class="stack">
         <h1>80 questions. 8 minutes.</h1>
         <p class="muted">
           The Optiver-style mental arithmetic test, offline and exact. Nothing you do here leaves this device.

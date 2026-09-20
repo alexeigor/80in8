@@ -123,7 +123,7 @@ export function Results(): JSX.Element {
       </div>
 
       {summary.byKind.length > 0 ? (
-        <section class="scroller">
+        <section class="scroller stack">
           <h2 class="small muted">By category</h2>
           <table data-testid="by-kind">
             <thead>
@@ -153,7 +153,7 @@ export function Results(): JSX.Element {
       ) : null}
 
       {summary.distractorSources.length > 0 ? (
-        <section>
+        <section class="stack">
           <h2 class="small muted">What tripped you up</h2>
           {/* The core reports only the distractors that were actually fallen for;
               correct choices are already filtered out of this list. */}

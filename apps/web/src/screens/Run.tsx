@@ -220,7 +220,7 @@ function Live(): JSX.Element {
             abortPending.value = false
           }}
         >
-          <div class="sheet">
+          <div class="sheet stack">
             <h2>End this run?</h2>
             <p class="muted">You have answered {state.answers.length} questions. They will be kept.</p>
             <div class="row">

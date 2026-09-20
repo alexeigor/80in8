@@ -13,7 +13,7 @@ All checks run passed after the fixes described below.
 | Biome lint and formatting | Passed, no warnings |
 | TypeScript checks | Passed, including E2E files |
 | Production build | Passed |
-| Full E2E matrix | 495 passed in 57.7 seconds, without retries |
+| Full E2E matrix | 495 passed in 57.4 seconds, without retries |
 | `/80in8/` subpath deployment | 10 additional checks passed |
 
 The browser matrix runs 99 scenarios on each of five projects: desktop Chromium,
@@ -100,6 +100,20 @@ Six scenarios in `keypad-availability.spec.ts` cover fresh phone/desktop default
 hybrid-device detection, restoring a hidden keypad by touch, persistence, keyboard
 activation and focus, and every key fitting on a small phone screen. The iPhone
 layout screenshot was reviewed.
+
+## Consistent spacing
+
+Shared spacing now separates page sections (24px), headings/text/actions within
+sections (16px), button groups (12px), and form labels/fields (8px). Browser-default
+paragraph margins no longer add inconsistent gaps. The same rules cover Home,
+History, Settings, Results, shortcuts, and the run confirmation dialog. Hidden
+file inputs do not disturb spacing. History, its confirmation, and Settings were
+also inspected interactively.
+
+The existing full browser matrix passed after the change, including collision,
+touch-target, and enlarged-text checks. Native dropdown styling differed between
+platforms and caused WebKit overflow; selects now share a field appearance while
+retaining the browser's native option menu.
 
 ## Offline testing limitation and resolution
 
