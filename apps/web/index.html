@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <!-- No maximum-scale and no user-scalable=no: pinch zoom stays available (N5). -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <!--__CSP__-->
+    <meta name="referrer" content="no-referrer" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#fbfbfa" media="(prefers-color-scheme: light)" />
+    <meta name="description" content="80 mental arithmetic questions in 8 minutes. Offline, private, exact." />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="80 in 8" />
+    <title>80 in 8</title>
+    <link rel="icon" href="__BASE__favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="__BASE__apple-touch-icon.png" />
+    <!--
+      Applies the stored theme before the first paint. A separate same-origin file
+      rather than an inline script so that `script-src 'self'` needs no 'unsafe-inline'.
+    -->
+    <script src="__BASE__theme.js"></script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <noscript>80 in 8 needs JavaScript: the whole trainer runs on your device.</noscript>
+  </body>
+</html>

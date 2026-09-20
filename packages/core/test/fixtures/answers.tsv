@@ -1,0 +1,47 @@
+# Answer-parsing fixture (DESIGN.md Appendix C).
+# This file is the single source of truth for the parser table: the appendix and the
+# test are generated from the same rows, so they cannot drift apart.
+#
+# input   a JSON string literal, so whitespace and the empty string are unambiguous
+# expect  "num/den" for an accepted value, or "!empty" / "!incomplete" / "!invalid"
+# form    expected AnswerForm for accepted values, "-" otherwise
+# note    why the row exists
+input	expect	form	note
+"42"	42/1	integer	a plain integer
+"-42"	-42/1	integer	ASCII hyphen as minus
+"−42"	-42/1	integer	Unicode minus sign, which is what the core renders
+"+42"	42/1	integer	a leading plus is allowed
+" 42"	42/1	integer	leading whitespace is ignored
+"0.5"	1/2	decimal	an ordinary decimal
+".5"	1/2	decimal	a bare leading point
+"0.50"	1/2	decimal	trailing zeros do not change the value
+"1."	1/1	integer	a trailing point is a complete integer
+"0,5"	1/2	decimal	comma as the decimal separator when no point is present
+"1,2345"	2469/2000	decimal	one comma and no point still means a decimal separator
+"1,234.5"	2469/2	decimal	comma as a thousands separator once a point appears
+"3/8"	3/8	fraction	a plain fraction
+"6/16"	3/8	fraction	accepted under the equivalent policy, rejected under simplified
+"-3/8"	-3/8	fraction	the sign belongs at the front
+"2 1/4"	9/4	mixed	a mixed number written with a space
+"2+1/4"	9/4	mixed	a mixed number written with a plus
+"-2 1/4"	-9/4	mixed	the sign applies to the whole mixed number
+""	!empty	-	nothing typed yet
+"-"	!incomplete	-	a sign on its own is the start of something
+"+"	!incomplete	-	likewise
+"−"	!incomplete	-	likewise, with the Unicode minus
+"."	!incomplete	-	a point on its own
+"3/"	!incomplete	-	halfway through a fraction
+"2 "	!incomplete	-	the space that starts a mixed number
+" 2 "	!incomplete	-	same, with leading whitespace
+"2+"	!incomplete	-	the plus that starts a mixed number
+"1/0"	!invalid	-	division by zero
+"abc"	!invalid	-	not a number at all
+"1..2"	!invalid	-	two decimal points
+"1/2/3"	!invalid	-	two fraction bars
+"--1"	!invalid	-	only one sign is allowed
+"3/-8"	!invalid	-	a sign inside a fraction
+"1,23.4"	!invalid	-	a comma that is not a thousands group
+"1,23,4"	!invalid	-	two commas with no decimal point
+"9007199254740993/4503599627370496"	!invalid	-	32 digits: rejected rather than rounded to 2
+"1234567890123456"	!invalid	-	16 digits exceeds the exactness cap
+"123456789012345"	123456789012345/1	integer	15 digits is the largest accepted

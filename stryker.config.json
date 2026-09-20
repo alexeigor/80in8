@@ -1,0 +1,22 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "_status": "BLOCKED. Stryker 10 cannot run against this toolchain, so the numbers it reports are wrong, not merely low. Two separate problems: (1) Stryker's tsconfig preprocessor calls ts.parseConfigFileTextToJson, which TypeScript 7's compiler API no longer exposes, so a run crashes before it starts unless tsconfigFile points at a file that does not exist; (2) with that bypassed, mutants are not activated in the Vitest 5 worker, so almost everything is reported as surviving. Verified by hand: deleting the throw inside assertExact fails three tests locally, and Stryker reported that same mutant as survived. Until the runner supports TypeScript 7, use `npm run mutation` (scripts/mutation-smoke.mjs), which applies representative mutations one at a time and asserts the suite catches each. Re-check this file when @stryker-mutator/vitest-runner declares TypeScript 7 support.",
+  "packageManager": "npm",
+  "testRunner": "vitest",
+  "vitest": { "configFile": "packages/core/vitest.config.ts", "related": false },
+  "reporters": ["html", "clear-text", "progress"],
+  "htmlReporter": { "fileName": "reports/mutation/index.html" },
+  "coverageAnalysis": "perTest",
+  "mutate": [
+    "packages/core/src/**/*.ts",
+    "!packages/core/src/**/*.test.ts",
+    "!packages/core/src/index.ts",
+    "!packages/core/src/**/types.ts"
+  ],
+  "thresholds": { "high": 95, "low": 85, "break": 85 },
+  "incremental": true,
+  "incrementalFile": "reports/stryker-incremental.json",
+  "timeoutMS": 60000,
+  "concurrency": 4,
+  "tsconfigFile": "stryker-tsconfig-absent.json"
+}
