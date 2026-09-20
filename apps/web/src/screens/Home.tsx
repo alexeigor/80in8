@@ -203,8 +203,7 @@ export function Home(): JSX.Element {
       ) : null}
 
       <p class="muted small">
-        The format is reconstructed from candidate reports, not from an official spec — see the design
-        document. <Link to="/history">Your history</Link> stays on this device.
+        <Link to="/history">Your history</Link> stays on this device.
       </p>
 
       {installPrompt.value && completed >= 2 ? (
