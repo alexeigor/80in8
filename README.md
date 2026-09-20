@@ -36,6 +36,8 @@ npm run e2e          # desktop and two phone layouts on Chromium
 E2E_CROSS_BROWSER=1 npm run e2e  # also Safari/WebKit and Firefox; iPhone uses WebKit
 ```
 
+The E2E command builds the core package first, so test discovery works from a fresh checkout.
+
 To select tests or control workers, pass arguments directly to the web workspace:
 `npm run e2e -w @80in8/web -- e2e/resilience.spec.ts --workers=2`.
 CI runs the full browser matrix in addition to `npm run ci`.

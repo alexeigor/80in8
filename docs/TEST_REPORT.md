@@ -101,5 +101,7 @@ BASE_PATH=/80in8/ E2E_CROSS_BROWSER=1 npm run e2e -w @80in8/web -- e2e/hosting.s
 Mobile coverage uses emulation, not physical phones. This was not a complete
 accessibility audit or Lighthouse run. Full Stryker remains blocked by the existing
 toolchain incompatibility documented in `stryker.config.json`; the mutation result
-above refers only to the smoke suite. CI configuration was updated but not executed
-on GitHub during this local test session.
+above refers only to the smoke suite. The results above describe the local test
+session; [GitHub Actions](https://github.com/alexeigor/80in8/actions) reports CI
+results separately. The first CI run exposed a missing core build before Playwright
+test discovery on a fresh checkout; the E2E command now builds that dependency first.

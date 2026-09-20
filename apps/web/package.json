@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
+    "pree2e": "npm run build -w @80in8/core",
     "e2e": "playwright test",
     "icons": "node scripts/make-icons.mjs"
   },
