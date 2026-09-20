@@ -913,6 +913,16 @@ td.num {
   box-shadow: var(--shadow);
 }
 
+/**
+ * A sheet whose content is a table rather than a sentence. The shortcuts reference
+ * needs about 42rem before its `nowrap` cells stop fitting, so at the default 34rem
+ * the column that says what each key *does* sat outside `.scroller` and had to be
+ * scrolled into view. Still capped by the viewport, so a phone keeps the scroller.
+ */
+.sheet.wide {
+  width: min(100%, 48rem);
+}
+
 .blurred {
   position: fixed;
   inset: auto 0 0 0;

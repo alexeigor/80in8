@@ -134,6 +134,55 @@ test.describe('on this device', () => {
     await beginRun(page)
     await expectNoCollisions(page, 'a multiple-choice run')
   })
+
+  /**
+   * The scan above compares every element against its own container, so a column
+   * scrolled out of an *ancestor* slipped past it: nothing was clipped, the sheet was
+   * simply narrower than the table inside it, and the column saying what each key does
+   * sat outside `.scroller` until you scrolled sideways. Two claims, then: the far
+   * column is always reachable, and wherever the viewport allows `.sheet.wide` its
+   * full width, nothing is hidden at all.
+   */
+  test('the keyboard reference shows every column the viewport has room for', async ({ page }) => {
+    await openHome(page)
+    // The home screen paints before `App`'s effect attaches the key handler, so a '?'
+    // sent the instant `openHome` returns can land on nothing — WebKit is the slowest
+    // to attach and loses that race. Retry until the sheet is actually up, pressing
+    // only while it is closed so a retry cannot toggle it shut again.
+    await expect(async () => {
+      if ((await page.getByTestId('shortcuts').count()) === 0) await page.keyboard.press('?')
+      await expect(page.getByTestId('shortcuts')).toBeVisible({ timeout: 250 })
+    }).toPass({ timeout: 10_000 })
+
+    const layout = await page.evaluate(() => {
+      const scroller = document.querySelector<HTMLElement>('[data-testid="shortcuts"] .scroller')
+      if (!scroller) throw new Error('the shortcuts sheet has no scroller')
+      const sheet = scroller.closest<HTMLElement>('.sheet')
+      const far = scroller.querySelector('tbody tr:last-child td:last-child')
+      if (!sheet || !far) throw new Error('the shortcuts sheet is not shaped as expected')
+
+      const hidden = scroller.scrollWidth - scroller.clientWidth
+      scroller.scrollLeft = scroller.scrollWidth
+      const reachable = far.getBoundingClientRect().right <= scroller.getBoundingClientRect().right + 1
+      scroller.scrollLeft = 0
+
+      // 'Capped' means the screen, not the stylesheet, is what stops the sheet growing:
+      // it already fills the space the overlay gives it. Asking instead whether the
+      // sheet is under some nominal width would excuse the very bug this test is for,
+      // since a too-narrow sheet is under it too.
+      const overlay = sheet.parentElement
+      if (!overlay) throw new Error('the sheet is not inside an overlay')
+      const pad = getComputedStyle(overlay)
+      const available =
+        overlay.clientWidth - Number.parseFloat(pad.paddingLeft) - Number.parseFloat(pad.paddingRight)
+      return { hidden, reachable, capped: sheet.getBoundingClientRect().width >= available - 1 }
+    })
+
+    expect(layout.reachable, 'the last column must be reachable by scrolling').toBe(true)
+    if (!layout.capped) {
+      expect(layout.hidden, 'no column may be hidden when the sheet fits').toBe(0)
+    }
+  })
 })
 
 test.describe('at 320px, the narrowest phone worth supporting', () => {

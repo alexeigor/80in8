@@ -28,7 +28,7 @@ export function Shortcuts({ onClose }: { onClose: () => void }): JSX.Element {
   return (
     <Modal label="Keyboard shortcuts" testId="shortcuts" onClose={onClose}>
       <button type="button" class="backdrop" tabIndex={-1} aria-label="Close" onClick={onClose} />
-      <div class="sheet stack">
+      <div class="sheet wide stack">
         <div class="masthead">
           <h2>Keyboard</h2>
           <button type="button" class="ghost" data-testid="shortcuts-close" onClick={onClose}>
