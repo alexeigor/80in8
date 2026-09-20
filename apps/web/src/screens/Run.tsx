@@ -58,7 +58,7 @@ function Countdown(): JSX.Element {
         {n}
       </div>
       <button type="button" class="ghost" data-testid="skip-countdown" onClick={skipCountdown}>
-        Skip (Enter)
+        Skip<span class="keyboard-hint"> (Enter)</span>
       </button>
     </main>
   )
@@ -208,7 +208,7 @@ function Live(): JSX.Element {
 
       {away ? (
         <div class="blurred" data-testid="blurred">
-          Click or press any key to continue — the clock is still running.
+          Tap or click to continue — the clock is still running.
         </div>
       ) : null}
 

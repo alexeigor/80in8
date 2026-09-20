@@ -53,7 +53,7 @@ export function McqGrid({ question, stacked, onSelect }: McqGridProps): JSX.Elem
           data-option-text={option.text}
           onClick={press(index)}
         >
-          <span class="hint" aria-hidden="true">
+          <span class="hint keyboard-hint" aria-hidden="true">
             {index + 1}
           </span>
           <Value text={option.text} stacked={stacked} />

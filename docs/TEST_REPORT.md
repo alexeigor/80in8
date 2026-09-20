@@ -13,10 +13,10 @@ All checks run passed after the fixes described below.
 | Biome lint and formatting | Passed, no warnings |
 | TypeScript checks | Passed, including E2E files |
 | Production build | Passed |
-| Full E2E matrix | 495 passed in 57.4 seconds, without retries |
+| Full E2E matrix | 505 passed in 58.8 seconds, without retries |
 | `/80in8/` subpath deployment | 10 additional checks passed |
 
-The browser matrix runs 99 scenarios on each of five projects: desktop Chromium,
+The browser matrix runs 101 scenarios on each of five projects: desktop Chromium,
 Pixel 7 emulation on Chromium, iPhone 15 emulation on WebKit, desktop WebKit, and
 desktop Firefox. Local environment: macOS ARM64, Node.js 26.8.2, Playwright 1.63.0.
 
@@ -114,6 +114,15 @@ The existing full browser matrix passed after the change, including collision,
 touch-target, and enlarged-text checks. Native dropdown styling differed between
 platforms and caused WebKit overflow; selects now share a field appearance while
 retaining the browser's native option menu.
+
+## Keyboard hints on touch devices
+
+Home, countdown, multiple-choice options and results now show shortcut hints only
+when the primary pointer is fine and supports hover. Phones show an `End` action
+instead of `Esc`. Keyboard commands and explicitly opened shortcut help remain
+available on every device. Two scenarios in `keyboard-hints.spec.ts` verify the
+labels throughout a run, phone/desktop behavior at narrow and wide viewports,
+touch activation, physical-keyboard input, and shortcut help.
 
 ## Offline testing limitation and resolution
 

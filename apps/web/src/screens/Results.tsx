@@ -89,13 +89,13 @@ export function Results(): JSX.Element {
 
       <div class="row">
         <button type="button" class="primary" data-testid="again" onClick={again}>
-          Again <kbd>Enter</kbd>
+          Again <kbd class="keyboard-hint">Enter</kbd>
         </button>
         <button type="button" data-testid="same-seed" onClick={sameSeed}>
-          Same seed <kbd>S</kbd>
+          Same seed <kbd class="keyboard-hint">S</kbd>
         </button>
         <button type="button" data-testid="retry" disabled={mistakes === 0} onClick={retryMistakes}>
-          Retry {mistakes} mistakes <kbd>M</kbd>
+          Retry {mistakes} mistakes <kbd class="keyboard-hint">M</kbd>
         </button>
         <button
           type="button"
@@ -106,7 +106,7 @@ export function Results(): JSX.Element {
             reviewOpen.value = !reviewOpen.value
           }}
         >
-          Review <kbd>R</kbd>
+          Review <kbd class="keyboard-hint">R</kbd>
         </button>
         {run.spec.kind === 'seeded' ? (
           <button

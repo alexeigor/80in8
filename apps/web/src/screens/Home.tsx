@@ -136,7 +136,7 @@ export function Home(): JSX.Element {
         <button type="button" class="primary" data-testid="start" autofocus onClick={start}>
           Start
         </button>
-        <span class="muted small">
+        <span class="muted small keyboard-hint">
           or press <kbd>Enter</kbd>
         </span>
         <button

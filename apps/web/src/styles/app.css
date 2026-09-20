@@ -956,6 +956,21 @@ kbd {
 
 /* ------------------------------------------------------------------ responsive */
 
+/* Shortcut hints suit a mouse/trackpad interface. Screen width alone cannot tell
+   a phone in landscape from a narrow desktop window. Keyboard bindings always work. */
+.keyboard-hint {
+  display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .keyboard-hint {
+    display: inline;
+  }
+  .touch-label {
+    display: none;
+  }
+}
+
 @media (min-width: 720px) {
   .options {
     grid-template-columns: repeat(4, minmax(0, 1fr));

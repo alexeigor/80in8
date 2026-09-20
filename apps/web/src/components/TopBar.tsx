@@ -56,7 +56,8 @@ export function TopBar({
           </span>
         ) : null}
         <button type="button" class="ghost small" data-testid="abort" onClick={onAbort}>
-          Esc
+          <span class="touch-label">End</span>
+          <span class="keyboard-hint">Esc</span>
         </button>
       </span>
       {flash ? <div class="flash" key={`tint-${flash.token}`} data-correct={String(flash.correct)} /> : null}
