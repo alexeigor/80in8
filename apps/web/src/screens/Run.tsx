@@ -2,7 +2,7 @@ import { liveScore } from '@80in8/core'
 import type { JSX } from 'preact'
 import { useEffect, useRef, useState } from 'preact/hooks'
 import { navigate } from '../adapters/router.js'
-import { prefersReducedMotion, settings } from '../adapters/settings.js'
+import { prefersReducedMotion, settings, updateSettings } from '../adapters/settings.js'
 import { Keypad, type KeypadAction } from '../components/Keypad.js'
 import { Link } from '../components/Link.js'
 import { McqGrid } from '../components/McqGrid.js'
@@ -174,7 +174,21 @@ function Live(): JSX.Element {
           <div class="hintline nums" data-testid="parse-hint">
             {parseHint(draft.value)}
           </div>
-          {keypad ? <Keypad onAction={onKeypad} allowSkip={profile.scoring.allowSkip} /> : null}
+          {keypad ? (
+            <Keypad onAction={onKeypad} allowSkip={profile.scoring.allowSkip} />
+          ) : (
+            <button
+              type="button"
+              class="ghost show-keypad"
+              data-testid="show-keypad"
+              onClick={() => {
+                updateSettings({ keypad: true })
+                field.current?.querySelector<HTMLInputElement>('[data-testid="typed-input"]')?.focus()
+              }}
+            >
+              Show keypad
+            </button>
+          )}
         </div>
       ) : (
         <div class="inputarea">

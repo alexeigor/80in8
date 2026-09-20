@@ -13,10 +13,10 @@ All checks run passed after the fixes described below.
 | Biome lint and formatting | Passed, no warnings |
 | TypeScript checks | Passed, including E2E files |
 | Production build | Passed |
-| Full E2E matrix | 430 passed in 52.3 seconds, without retries |
+| Full E2E matrix | 495 passed in 57.7 seconds, without retries |
 | `/80in8/` subpath deployment | 10 additional checks passed |
 
-The browser matrix runs 86 scenarios on each of five projects: desktop Chromium,
+The browser matrix runs 99 scenarios on each of five projects: desktop Chromium,
 Pixel 7 emulation on Chromium, iPhone 15 emulation on WebKit, desktop WebKit, and
 desktop Firefox. Local environment: macOS ARM64, Node.js 26.8.2, Playwright 1.63.0.
 
@@ -76,6 +76,30 @@ New browser files: `invalid-data.spec.ts`, `recovery.spec.ts`,
 `updates.spec.ts`, `custom-sharing.spec.ts`, and `input-accessibility.spec.ts`.
 New unit files: core `persist/validate.test.ts` and web adapter
 `history.test.ts`, `share.test.ts`, and `sw.test.ts`.
+
+## Settings switches
+
+The settings now use labelled switches instead of wrapping On/Off buttons. The
+control column stays aligned beside descriptions, with 52 × 44px tap targets,
+keyboard operation, screen-reader names and descriptions, and reduced-motion support.
+
+Seven scenarios in `settings-switches.spec.ts` cover label clicks, Space and Enter,
+touch interaction, persistence for every switch, disabled auto-submit, and dark/light
+layouts at 320px with both normal and 200% text. The enlarged-text checks also caught
+and fixed a WebKit native-select overflow. Screenshots of both themes were reviewed.
+
+## Mobile keypad availability
+
+Touch detection now includes secondary coarse pointers and touch-point support,
+while respecting saved preferences. A hidden keypad can be shown during a typed
+run without losing the current answer. Enter and Space activate focused controls
+instead of accidentally submitting. Flexible question spacing keeps Submit visible
+on a 320 × 568 screen; enlarged text can scroll without overlapping controls.
+
+Six scenarios in `keypad-availability.spec.ts` cover fresh phone/desktop defaults,
+hybrid-device detection, restoring a hidden keypad by touch, persistence, keyboard
+activation and focus, and every key fitting on a small phone screen. The iPhone
+layout screenshot was reviewed.
 
 ## Offline testing limitation and resolution
 

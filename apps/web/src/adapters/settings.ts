@@ -8,13 +8,15 @@ const KEY = '80in8:settings:v1'
  * and an app that cannot remember a preference must still be an app.
  */
 /**
- * The keypad exists for touch. On a device with a real keyboard it is in the way, so
- * the *first* visit picks a default from the pointer type; after that the stored
- * preference wins, whatever the device.
+ * Show the keypad on touch-capable devices, including phones/tablets with a mouse
+ * attached. After the first visit the stored preference wins, whatever the device.
  */
 function firstRunDefaults(): Settings {
-  const coarse = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches
-  return { ...DEFAULT_SETTINGS, keypad: coarse }
+  const coarse =
+    typeof matchMedia === 'function' &&
+    (matchMedia('(pointer: coarse)').matches || matchMedia('(any-pointer: coarse)').matches)
+  const touch = typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0
+  return { ...DEFAULT_SETTINGS, keypad: coarse || touch }
 }
 
 function read(): Settings {

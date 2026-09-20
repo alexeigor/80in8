@@ -111,6 +111,15 @@ function runKey(event: KeyboardEvent, mode: string, answered: number, allowSkip:
     return
   }
 
+  // Enter/Space activate a focused button (including Show keypad). They only
+  // submit/edit an answer when focus is on the answer field or the run itself.
+  if (
+    (event.key === 'Enter' || event.key === ' ') &&
+    event.target instanceof HTMLElement &&
+    event.target.closest('button, a[href]')
+  )
+    return
+
   // ArrowRight skips. Space never does — it is the mixed-number separator.
   if (event.key === 'ArrowRight') {
     event.preventDefault()

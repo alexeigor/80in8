@@ -10,6 +10,10 @@ import { Masthead } from '../components/Link.js'
 import { isIos, isStandalone } from '../install.js'
 import { showToast } from '../ui-state.js'
 
+type ToggleField = {
+  [Key in keyof SettingsShape]: SettingsShape[Key] extends boolean ? Key : never
+}[keyof SettingsShape]
+
 function Toggle({
   label,
   hint,
@@ -18,26 +22,40 @@ function Toggle({
 }: {
   label: string
   hint?: string
-  field: keyof SettingsShape
+  field: ToggleField
   disabled?: boolean
 }): JSX.Element {
-  const value = Boolean(settings.value[field])
+  const value = settings.value[field]
+  const id = `s-${field}`
   return (
-    <div class="row" style="justify-content:space-between">
-      <span>
-        {label}
-        {hint ? <div class="muted small">{hint}</div> : null}
+    <label class="setting-toggle" for={id} data-disabled={disabled || undefined}>
+      <span class="setting-toggle-copy">
+        <span class="setting-toggle-label" id={`${id}-label`}>
+          {label}
+        </span>
+        {hint ? (
+          <span class="setting-toggle-hint" id={`${id}-hint`}>
+            {hint}
+          </span>
+        ) : null}
       </span>
       <button
+        id={id}
         type="button"
+        class="setting-switch"
+        role="switch"
         data-testid={`toggle-${field}`}
-        aria-pressed={value}
+        aria-checked={value}
+        aria-labelledby={`${id}-label`}
+        aria-describedby={hint ? `${id}-hint` : undefined}
         disabled={disabled}
-        onClick={() => updateSettings({ [field]: !value } as Partial<SettingsShape>)}
+        onClick={() => updateSettings({ [field]: !value })}
       >
-        {value ? 'On' : 'Off'}
+        <span class="switch-track" aria-hidden="true">
+          <span class="switch-thumb" />
+        </span>
       </button>
-    </div>
+    </label>
   )
 }
 
@@ -59,7 +77,7 @@ export function SettingsScreen(): JSX.Element {
   const profile: Profile | undefined = resolveProfile(current.profileRef)
 
   return (
-    <main class="page" data-testid="settings">
+    <main class="page settings-page" data-testid="settings">
       <Masthead />
       <h1>Settings</h1>
 
@@ -135,8 +153,10 @@ export function SettingsScreen(): JSX.Element {
         </div>
       </section>
 
-      <section class="card">
-        <h2 class="small muted">Input</h2>
+      <fieldset class="card" aria-labelledby="input-settings-title">
+        <h2 class="small muted" id="input-settings-title">
+          Input
+        </h2>
         <Toggle
           label="On-screen keypad"
           hint="Keeps the OS keyboard closed; the physical keyboard still works."
@@ -153,10 +173,12 @@ export function SettingsScreen(): JSX.Element {
           disabled={!profile?.allowAutoSubmit}
         />
         <Toggle label="Stacked fractions" field="stackedFractions" />
-      </section>
+      </fieldset>
 
-      <section class="card">
-        <h2 class="small muted">During a run</h2>
+      <fieldset class="card" aria-labelledby="run-settings-title">
+        <h2 class="small muted" id="run-settings-title">
+          During a run
+        </h2>
         <Toggle
           label="Answer feedback"
           hint="A ✓ or ✗ in the top bar. Turn off for exam realism."
@@ -174,7 +196,7 @@ export function SettingsScreen(): JSX.Element {
           hint="Drops the fades and the shake. Already on whenever your system asks for it."
           field="reducedMotion"
         />
-      </section>
+      </fieldset>
 
       <section class="card">
         <h2 class="small muted">Data</h2>

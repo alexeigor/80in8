@@ -54,7 +54,7 @@ test.describe('preferences', () => {
 
     await page.reload()
     await expect(page.locator('html')).toHaveAttribute('data-motion', 'reduced')
-    await expect(page.getByTestId('toggle-reducedMotion')).toHaveAttribute('aria-pressed', 'true')
+    await expect(page.getByRole('switch', { name: 'Reduce motion' })).toBeChecked()
   })
 
   test('the theme override applies before the first paint', async ({ page }) => {

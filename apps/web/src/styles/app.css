@@ -237,6 +237,14 @@ input[type="number"] {
   gap: 14px;
 }
 
+/* WebKit's native menu label can overflow its box when text is enlarged. */
+.settings-page select {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .segmented {
   display: inline-flex;
   align-self: flex-start;
@@ -261,12 +269,104 @@ input[type="number"] {
   font-weight: 650;
 }
 
+/* A fixed switch column keeps long descriptions from pushing controls to a new row. */
+.setting-toggle {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 52px;
+  gap: 16px;
+  align-items: start;
+  padding: 16px 0;
+  color: var(--text);
+  font-size: 1rem;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.setting-toggle + .setting-toggle {
+  border-top: 1px solid var(--line);
+}
+
+.setting-toggle:last-child {
+  padding-bottom: 0;
+}
+
+.setting-toggle[data-disabled] {
+  cursor: default;
+}
+
+.setting-toggle-copy {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.setting-toggle-label,
+.setting-toggle-hint {
+  display: block;
+}
+
+.setting-toggle-hint {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* The visible track is compact; the button retains a 52 × 44px touch target. */
+.setting-switch {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 44px;
+  margin-top: -8px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+}
+
+.setting-switch:focus-visible {
+  border-radius: 999px;
+}
+
+.switch-track {
+  position: relative;
+  display: block;
+  width: 48px;
+  height: 28px;
+  border: 1px solid var(--muted);
+  border-radius: 999px;
+  background: var(--surface-2);
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.switch-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--muted);
+  transition: transform 160ms ease, background-color 160ms ease;
+}
+
+.setting-switch[aria-checked="true"] .switch-track {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.setting-switch[aria-checked="true"] .switch-thumb {
+  background: var(--accent-ink);
+  transform: translateX(20px);
+}
+
 /* ------------------------------------------------------------------ run screen */
 
 .run {
   display: grid;
-  /* Fixed rows: the question never moves the input, however long it is. */
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  /* Give spare space to the question; keep the keypad inside a short viewport.
+     Enlarged text can still grow the content and scroll instead of overlapping. */
+  grid-template-rows: auto minmax(min-content, 1fr) auto;
+  height: 100dvh;
   min-height: 100dvh;
 }
 
@@ -421,8 +521,10 @@ input[type="number"] {
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Fixed height: a two-line fraction must not push the keypad down. */
-  height: clamp(110px, 20vh, 168px);
+  /* Reserve question space without letting it push the keypad off short screens. */
+  flex: 1;
+  min-height: min-content;
+  max-height: clamp(110px, 20vh, 168px);
   width: 100%;
   font-family: var(--mono);
   font-size: clamp(22px, 8vw, 3rem);
@@ -470,6 +572,10 @@ input[type="number"] {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.show-keypad {
+  align-self: center;
 }
 
 /* ------------------------------------------------------------------ mcq */

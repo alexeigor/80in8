@@ -48,7 +48,7 @@ test('a short run can be completed using only the on-screen keypad', async ({ pa
   }
   await page.goto('/settings')
   const toggle = page.getByTestId('toggle-keypad')
-  if ((await toggle.getAttribute('aria-pressed')) !== 'true') await toggle.click()
+  if (!(await toggle.isChecked())) await toggle.click()
   await openHome(page)
   await page.getByTestId('toggle-advanced').click()
   await page.getByTestId('count').fill('3')
