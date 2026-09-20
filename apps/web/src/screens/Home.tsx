@@ -1,8 +1,8 @@
-import { CURRENT_PRESETS, hash8, type Mode, type Profile } from '@80in8/core'
+import { hash8, type Mode, type Profile } from '@80in8/core'
 import type { JSX } from 'preact'
 import { useEffect, useState } from 'preact/hooks'
 import { runs } from '../adapters/history.js'
-import { resolveProfile } from '../adapters/profiles.js'
+import { isBuiltIn, refOf, resolveProfile } from '../adapters/profiles.js'
 import { params } from '../adapters/router.js'
 import { settings, updateSettings } from '../adapters/settings.js'
 import { readSharedRun } from '../adapters/share.js'
@@ -12,9 +12,14 @@ import {
   deriveProfile,
   describeLimit,
   describeScoring,
+  hasQuestionMix,
   isPractice,
   PACE_LABELS,
   type Pace,
+  TEST_PRESETS,
+  testName,
+  testRefFor,
+  withQuestionMix,
 } from '../profile-choice.js'
 import { randomSeed, runError, startRun } from '../session.js'
 
@@ -26,7 +31,7 @@ export function seedFromText(text: string): number {
   return Number.parseInt(hash8(trimmed), 16) >>> 0
 }
 
-const DEFAULT_PRESET = CURRENT_PRESETS[0] as Profile
+const DEFAULT_PRESET = TEST_PRESETS[0] as Profile
 
 export function Home(): JSX.Element {
   const shared = readSharedRun(params())
@@ -41,6 +46,7 @@ export function Home(): JSX.Element {
   const [more, setMore] = useState(false)
 
   const base = sharedProfile ?? resolveProfile(profileRef) ?? DEFAULT_PRESET
+  const custom = !isBuiltIn(base)
   const profile = deriveProfile(base, count ?? base.questionCount, pace, settings.value.fractionPolicy)
 
   useEffect(() => {
@@ -78,23 +84,25 @@ export function Home(): JSX.Element {
 
       <div class="grid2">
         <div class="field">
-          <label for="profile">Profile</label>
+          <label for="profile">Test</label>
           <select
             id="profile"
             data-testid="profile"
-            value={sharedProfile ? 'shared' : profileRef}
+            value={custom ? 'shared' : testRefFor(`${base.id}@${base.version}`)}
             onChange={(event) => {
               const chosen = event.currentTarget.value
               if (chosen === 'shared') return
               setSharedProfile(null)
               setProfileRef(chosen)
               setCount(null)
-              const next = resolveProfile(chosen)
-              if (next) setMode(next.defaultMode)
             }}
           >
-            {sharedProfile ? <option value="shared">{sharedProfile.name} (from link)</option> : null}
-            {CURRENT_PRESETS.map((preset) => (
+            {custom ? (
+              <option value="shared">
+                {testName(base)} ({sharedProfile ? 'from link' : 'custom'})
+              </option>
+            ) : null}
+            {TEST_PRESETS.map((preset) => (
               <option key={preset.id} value={`${preset.id}@${preset.version}`}>
                 {preset.name}
               </option>
@@ -103,9 +111,9 @@ export function Home(): JSX.Element {
         </div>
 
         <div class="field">
-          <span class="lbl">Mode</span>
+          <span class="lbl">Answer format</span>
           <fieldset class="segmented">
-            <legend class="sr-only">Answer mode</legend>
+            <legend class="sr-only">Answer format</legend>
             <button
               type="button"
               id="mode-typed"
@@ -113,7 +121,7 @@ export function Home(): JSX.Element {
               aria-pressed={mode === 'typed'}
               onClick={() => setMode('typed')}
             >
-              Typed
+              Enter answers
             </button>
             <button
               type="button"
@@ -130,6 +138,9 @@ export function Home(): JSX.Element {
 
       <p class="muted small" data-testid="disclosure">
         {profile.questionCount} questions · {describeLimit(profile)} · {describeScoring(profile)}
+        {hasQuestionMix(base) && base.missingOperandShare !== 0.2
+          ? ` · ${Math.round(base.missingOperandShare * 100)}% missing-number questions`
+          : ''}
       </p>
 
       <div class="row">
@@ -152,6 +163,33 @@ export function Home(): JSX.Element {
 
       {more ? (
         <div class="card grid2" data-testid="advanced">
+          {hasQuestionMix(base) ? (
+            <div class="field">
+              <label for="question-mix">Question mix</label>
+              <select
+                id="question-mix"
+                data-testid="question-mix"
+                aria-describedby="question-mix-hint"
+                value={String(base.missingOperandShare)}
+                onChange={(event) => {
+                  const next = withQuestionMix(base, event.currentTarget.value === '0.4' ? 0.4 : 0.2)
+                  if (sharedProfile) setSharedProfile(next)
+                  else setProfileRef(refOf(next))
+                }}
+              >
+                {base.missingOperandShare !== 0.2 && base.missingOperandShare !== 0.4 ? (
+                  <option value={String(base.missingOperandShare)}>
+                    From link ({Math.round(base.missingOperandShare * 100)}%)
+                  </option>
+                ) : null}
+                <option value="0.2">Standard (20%)</option>
+                <option value="0.4">More missing numbers (40%)</option>
+              </select>
+              <p class="muted small" id="question-mix-hint">
+                Missing-number questions, such as ? × 5 = 35. Available with either answer format.
+              </p>
+            </div>
+          ) : null}
           <div class="field">
             <label for="seed">Seed (blank for a new one)</label>
             <input

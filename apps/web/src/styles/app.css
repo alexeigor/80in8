@@ -248,8 +248,12 @@ input[type="number"] {
 
 .grid2 {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
   gap: var(--space-4);
+}
+
+.grid2 > p {
+  grid-column: 1 / -1;
 }
 
 /* Keep the native menu, with a consistent field and chevron across browsers.

@@ -1,4 +1,4 @@
-import { CURRENT_PRESETS, type Profile, type Settings as SettingsShape } from '@80in8/core'
+import type { Profile, Settings as SettingsShape } from '@80in8/core'
 import type { JSX } from 'preact'
 import { useEffect, useState } from 'preact/hooks'
 import { downloadExport, importExport } from '../adapters/history.js'
@@ -8,6 +8,7 @@ import { settings, settingsPersisted, updateSettings } from '../adapters/setting
 import { applyUpdate, updateReady } from '../adapters/sw.js'
 import { Masthead } from '../components/Link.js'
 import { isIos, isStandalone } from '../install.js'
+import { TEST_PRESETS, testRefFor } from '../profile-choice.js'
 import { showToast } from '../ui-state.js'
 
 type ToggleField = {
@@ -91,14 +92,14 @@ export function SettingsScreen(): JSX.Element {
         <h2 class="small muted">Test</h2>
         <div class="grid2">
           <div class="field">
-            <label for="s-profile">Default profile</label>
+            <label for="s-profile">Default test</label>
             <select
               id="s-profile"
               data-testid="setting-profile"
-              value={current.profileRef}
+              value={testRefFor(current.profileRef)}
               onChange={(event) => updateSettings({ profileRef: event.currentTarget.value })}
             >
-              {CURRENT_PRESETS.map((preset) => (
+              {TEST_PRESETS.map((preset) => (
                 <option key={preset.id} value={`${preset.id}@${preset.version}`}>
                   {preset.name}
                 </option>
@@ -106,7 +107,7 @@ export function SettingsScreen(): JSX.Element {
             </select>
           </div>
           <div class="field">
-            <label for="s-mode">Default mode</label>
+            <label for="s-mode">Default answer format</label>
             <select
               id="s-mode"
               data-testid="setting-mode"
@@ -115,10 +116,28 @@ export function SettingsScreen(): JSX.Element {
                 updateSettings({ mode: event.currentTarget.value === 'mcq' ? 'mcq' : 'typed' })
               }
             >
-              <option value="typed">Typed</option>
+              <option value="typed">Enter answers</option>
               <option value="mcq">Multiple choice</option>
             </select>
           </div>
+          {testRefFor(current.profileRef) === 'optiver-classic@1' ? (
+            <div class="field">
+              <label for="s-question-mix">Default question mix</label>
+              <select
+                id="s-question-mix"
+                data-testid="setting-question-mix"
+                value={current.profileRef === 'optiver-mcq@1' ? '0.4' : '0.2'}
+                onChange={(event) =>
+                  updateSettings({
+                    profileRef: event.currentTarget.value === '0.4' ? 'optiver-mcq@1' : 'optiver-classic@1',
+                  })
+                }
+              >
+                <option value="0.2">Standard (20%)</option>
+                <option value="0.4">More missing numbers (40%)</option>
+              </select>
+            </div>
+          ) : null}
           <div class="field">
             <label for="s-fractions">Fraction answers</label>
             <select

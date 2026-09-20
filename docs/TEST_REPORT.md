@@ -7,16 +7,16 @@ All checks run passed after the fixes described below.
 | Check | Result |
 | --- | --- |
 | Core unit and property tests | 500 passed |
-| Web unit tests | 48 passed |
+| Web unit tests | 53 passed |
 | Core coverage | 100% statements, branches, functions, and lines |
 | Mutation smoke tests | All 16 representative mutations detected |
 | Biome lint and formatting | Passed, no warnings |
 | TypeScript checks | Passed, including E2E files |
 | Production build | Passed |
-| Full E2E matrix | 505 passed in 58.8 seconds, without retries |
+| Full E2E matrix | 545 passed in 1.1 minutes, without retries |
 | `/80in8/` subpath deployment | 10 additional checks passed |
 
-The browser matrix runs 101 scenarios on each of five projects: desktop Chromium,
+The browser matrix runs 109 scenarios on each of five projects: desktop Chromium,
 Pixel 7 emulation on Chromium, iPhone 15 emulation on WebKit, desktop WebKit, and
 desktop Firefox. Local environment: macOS ARM64, Node.js 26.8.2, Playwright 1.63.0.
 
@@ -123,6 +123,22 @@ instead of `Esc`. Keyboard commands and explicitly opened shortcut help remain
 available on every device. Two scenarios in `keyboard-hints.spec.ts` verify the
 labels throughout a run, phone/desktop behavior at narrow and wide viewports,
 touch activation, physical-keyboard input, and shortcut help.
+
+## Test selection and answer format
+
+Home and Settings offer one classic Optiver test entry. Answer format is independent
+of test selection, with Enter answers and Multiple choice options. The old MCQ
+preset's 40% missing-number mix is available under Question mix alongside the
+standard 20% mix. Existing preset IDs, saved attempts and shared links stay valid.
+
+Eight scenarios in `profile-selection.spec.ts` exercise both formats with both
+mixes, persistence after reload, changing tests without resetting the answer format,
+legacy run links, custom shared timing/count/scoring, and importing old settings
+and history. Five unit cases cover preset mapping and question identity. The phone
+and desktop layouts were also reviewed from browser screenshots. Viewport captures
+on phones preserve touch emulation; a full-page Chromium capture was observed to
+change pointer capabilities and reveal desktop hints during this check. The added
+assertions verify those hints stay hidden before and after the viewport captures.
 
 ## Offline testing limitation and resolution
 

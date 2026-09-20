@@ -1,10 +1,57 @@
 import { generateRun, PRESETS, profileRefOf } from '@80in8/core'
 import { describe, expect, it } from 'vitest'
-import { deriveProfile, describeLimit, describeScoring } from './profile-choice.js'
+import {
+  deriveProfile,
+  describeLimit,
+  describeScoring,
+  TEST_PRESETS,
+  testName,
+  testRefFor,
+  withQuestionMix,
+} from './profile-choice.js'
 
 const CLASSIC = PRESETS['optiver-classic']
 
 const refOf = (profile: typeof CLASSIC) => profileRefOf(profile, false)
+
+describe('separating test, answer format and question mix', () => {
+  it('shows one classic Optiver choice while mapping legacy references and names', () => {
+    expect(TEST_PRESETS).toContain(CLASSIC)
+    expect(TEST_PRESETS).not.toContain(PRESETS['optiver-mcq'])
+    expect(testRefFor('optiver-mcq@1')).toBe('optiver-classic@1')
+    expect(testRefFor('optiver-harsh@1')).toBe('optiver-harsh@1')
+    expect(testName(deriveProfile(PRESETS['optiver-mcq'], 3, 'extended'))).toBe(
+      'Optiver 80 in 8 — 3 questions · Extended time (×10)',
+    )
+  })
+
+  it('reuses frozen presets, including snapshots, when changing the built-in mix', () => {
+    expect(withQuestionMix(CLASSIC, 0.2)).toBe(CLASSIC)
+    expect(withQuestionMix(CLASSIC, 0.4)).toBe(PRESETS['optiver-mcq'])
+    expect(withQuestionMix({ ...PRESETS['optiver-mcq'] }, 0.2)).toBe(CLASSIC)
+  })
+
+  it('preserves a custom snapshot and restores its question identity after a mix round trip', () => {
+    const custom = deriveProfile(PRESETS['optiver-mcq'], 3, 'extended', 'simplified')
+    const changed = withQuestionMix(custom, 0.2)
+    expect(changed).toEqual({ ...custom, missingOperandShare: 0.2 })
+    expect(custom.missingOperandShare).toBe(0.4)
+    expect(refOf(changed)).not.toBe(refOf(custom))
+    expect(refOf(withQuestionMix(changed, 0.4))).toBe(refOf(custom))
+    expect(withQuestionMix(custom, 0.4)).toBe(custom)
+  })
+
+  for (const share of [0.2, 0.4] as const) {
+    it(`keeps legacy question IDs in both answer formats with a ${share * 100}% mix`, () => {
+      const chosen = withQuestionMix(CLASSIC, share)
+      const legacy = share === 0.4 ? PRESETS['optiver-mcq'] : CLASSIC
+      const expected = generateRun('legacy', 4242, legacy, legacy.defaultMode).questionIds
+      for (const mode of ['typed', 'mcq'] as const) {
+        expect(generateRun('new', 4242, chosen, mode).questionIds).toEqual(expected)
+      }
+    })
+  }
+})
 
 describe('deriveProfile', () => {
   it('returns the preset untouched when nothing was overridden', () => {

@@ -1,7 +1,44 @@
-import { EXTENDED_TIME_FACTOR, type Profile, practiceVariant } from '@80in8/core'
+import {
+  CURRENT_PRESETS,
+  canonicalJson,
+  EXTENDED_TIME_FACTOR,
+  PRESETS,
+  type Profile,
+  practiceVariant,
+} from '@80in8/core'
+
+/** The legacy MCQ preset remains resolvable, but its mix is now a separate control. */
+export const TEST_PRESETS = CURRENT_PRESETS.filter((profile) => profile.id !== 'optiver-mcq')
+
+export function testRefFor(ref: string): string {
+  return ref === 'optiver-mcq@1' ? 'optiver-classic@1' : ref
+}
+
+export function testName(profile: Profile): string {
+  return profile.id === 'optiver-mcq'
+    ? profile.name.replace(PRESETS['optiver-mcq'].name, PRESETS['optiver-classic'].name)
+    : profile.name
+}
+
+export function hasQuestionMix(profile: Profile): boolean {
+  return profile.id === 'optiver-classic' || profile.id === 'optiver-mcq'
+}
+
+export function withQuestionMix(base: Profile, share: 0.2 | 0.4): Profile {
+  if (share === base.missingOperandShare) return base
+  // Reuse the frozen presets so existing settings, question IDs and links remain
+  // compatible. Custom/shared variants retain their timing, scoring and count.
+  if (
+    canonicalJson(base) === canonicalJson(PRESETS['optiver-classic']) ||
+    canonicalJson(base) === canonicalJson(PRESETS['optiver-mcq'])
+  ) {
+    return share === 0.4 ? PRESETS['optiver-mcq'] : PRESETS['optiver-classic']
+  }
+  return { ...base, missingOperandShare: share }
+}
 
 /**
- * Turning the Home screen's controls into a profile.
+ * Apply count, pacing and marking after choosing the base question mix.
  *
  * Only `questionCount` here reaches question generation, so only changing it forks the
  * question ids (a 40-question paper genuinely is a different paper). Pacing and marking
