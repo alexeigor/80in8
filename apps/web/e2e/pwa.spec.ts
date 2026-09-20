@@ -78,3 +78,41 @@ test.describe('installability and offline', () => {
     }
   })
 })
+
+test.describe('offline deep links', () => {
+  test('a shared question and the history page open from cold while offline', async ({
+    page,
+    context,
+    browserName,
+  }) => {
+    const server = await serveBuild()
+    try {
+      await page.goto(server.origin)
+      await page.evaluate(() => navigator.serviceWorker.ready.then(() => undefined))
+      await page.reload()
+      await page.waitForFunction(() => navigator.serviceWorker.controller !== null)
+
+      // Something to come back to: one answered run, and the id of its first question.
+      await page.goto(`${server.origin}${homeUrl({ profileRef: CLASSIC, mode: 'typed', seed: 32 })}`)
+      await beginRun(page)
+      const id = await page.getByTestId('question').getAttribute('data-question-id')
+      await answerCurrent(page, 'typed')
+      await page.keyboard.press('Escape')
+      await expect(page.getByTestId('results')).toBeVisible()
+
+      await server.stop()
+      await expect(page.request.get(server.origin)).rejects.toThrow()
+      if (browserName !== 'webkit') await context.setOffline(true)
+
+      // Full navigations to paths the server has never served: only the worker's
+      // navigation fallback can answer them.
+      await page.goto(`${server.origin}/q/${id}`)
+      await expect(page.getByTestId('question')).toHaveAttribute('data-question-id', id ?? '')
+      await page.goto(`${server.origin}/history`)
+      await expect(page.getByTestId('history-row')).toHaveCount(1)
+    } finally {
+      await context.setOffline(false)
+      await server.stop()
+    }
+  })
+})

@@ -1,4 +1,12 @@
-import { formatCanonical, type Mode, type Question, questionFromIdOrThrow, resolvePreset } from '@80in8/core'
+import {
+  formatCanonical,
+  type Mode,
+  type Profile,
+  parseId,
+  type Question,
+  questionFromIdOrThrow,
+  resolvePreset,
+} from '@80in8/core'
 import { expect, type Page } from '@playwright/test'
 
 /**
@@ -36,7 +44,43 @@ export async function beginRun(page: Page): Promise<void> {
 export async function currentQuestion(page: Page): Promise<Question> {
   const id = await page.getByTestId('question').getAttribute('data-question-id')
   if (!id) throw new Error('no question id in the DOM')
-  return questionFromIdOrThrow(id, resolvePreset)
+  const parsed = parseId(id)
+  // A derived profile (a different count, pace or marking) is referenced as
+  // `custom-<hash>`, and the app keeps its snapshot in IndexedDB. Read it back from
+  // there so the expected answer still comes from the library, not from a guess.
+  const custom = 'error' in parsed || resolvePreset(parsed.profileRef) ? {} : await storedProfiles(page)
+  return questionFromIdOrThrow(id, (ref) => resolvePreset(ref) ?? custom[ref])
+}
+
+/** The custom profile snapshots the page has remembered, keyed by reference. */
+export async function storedProfiles(page: Page): Promise<Record<string, Profile>> {
+  return page.evaluate(
+    () =>
+      new Promise<Record<string, Profile>>((resolve) => {
+        const request = indexedDB.open('80in8-profiles')
+        request.onerror = () => resolve({})
+        request.onsuccess = () => {
+          const db = request.result
+          if (!db.objectStoreNames.contains('kv')) {
+            db.close()
+            resolve({})
+            return
+          }
+          const store = db.transaction('kv').objectStore('kv')
+          const keys = store.getAllKeys()
+          const values = store.getAll()
+          values.onsuccess = () => {
+            const out: Record<string, Profile> = {}
+            keys.result.forEach((key, index) => {
+              out[String(key)] = values.result[index] as Profile
+            })
+            db.close()
+            resolve(out)
+          }
+          values.onerror = () => resolve({})
+        }
+      }),
+  )
 }
 
 /** The answer as the parser will accept it, with the typographic minus normalised. */

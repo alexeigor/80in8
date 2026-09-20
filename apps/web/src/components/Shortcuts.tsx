@@ -1,5 +1,6 @@
 import type { JSX } from 'preact'
 import { Modal } from './Modal.js'
+import { Scroller } from './Scroller.js'
 
 /** The binding table from DESIGN.md §7.8, rendered verbatim so the docs stay honest. */
 
@@ -21,7 +22,7 @@ const ROWS: [string, string, string][] = [
   ['Results', 'S', 'Same seed'],
   ['Results', 'M', 'Retry mistakes'],
   ['Results', 'R', 'Review'],
-  ['Anywhere', '?', 'This table'],
+  ['Anywhere but a text field', '?', 'This table'],
 ]
 
 export function Shortcuts({ onClose }: { onClose: () => void }): JSX.Element {
@@ -35,7 +36,7 @@ export function Shortcuts({ onClose }: { onClose: () => void }): JSX.Element {
             Close
           </button>
         </div>
-        <div class="scroller">
+        <Scroller label="Key bindings">
           <table>
             <thead>
               <tr>
@@ -56,7 +57,7 @@ export function Shortcuts({ onClose }: { onClose: () => void }): JSX.Element {
               ))}
             </tbody>
           </table>
-        </div>
+        </Scroller>
       </div>
     </Modal>
   )

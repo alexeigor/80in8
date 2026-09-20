@@ -47,7 +47,8 @@ function interactive(target: EventTarget | null): boolean {
 export function handleKey(event: KeyboardEvent): void {
   if (event.metaKey || event.ctrlKey || event.altKey || event.isComposing) return
 
-  if (event.key === '?' && !abortPending.value) {
+  // A '?' typed into the seed field is a character, not a request for the table.
+  if (event.key === '?' && !abortPending.value && !editable(event.target)) {
     event.preventDefault()
     shortcutsOpen.value = !shortcutsOpen.value
     return

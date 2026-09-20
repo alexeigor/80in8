@@ -75,10 +75,17 @@ test('shortcuts trap focus and restore it when dismissed', async ({ page }) => {
   await page.keyboard.press('?')
   const close = page.getByTestId('shortcuts-close')
   await expect(close).toBeFocused()
-  await page.keyboard.press('Tab')
-  await expect(close).toBeFocused()
-  await page.keyboard.press('Shift+Tab')
-  await expect(close).toBeFocused()
+  // The sheet has one control, plus the table itself when it scrolls sideways on a
+  // narrow screen. Either way a full cycle in each direction stays inside and comes
+  // back to Close.
+  const insideSheet = () =>
+    page.evaluate(() => document.activeElement?.closest('[data-testid="shortcuts"]') !== null)
+  for (const key of ['Tab', 'Shift+Tab']) {
+    await page.keyboard.press(key)
+    expect(await insideSheet()).toBe(true)
+    if (!(await close.evaluate((el) => el === document.activeElement))) await page.keyboard.press(key)
+    await expect(close).toBeFocused()
+  }
   await page.keyboard.press('Escape')
   await expect(page.getByTestId('shortcuts')).toHaveCount(0)
   await expect(start).toBeFocused()

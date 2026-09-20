@@ -3,10 +3,15 @@ import { createServer } from 'node:http'
 import { extname, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-/** An isolated production origin which a test can take completely offline. */
+/**
+ * An isolated production origin which a test can take completely offline. Every path
+ * served is appended to `hits`, so a test can also assert what the browser fetched —
+ * the hourly service-worker update check is invisible to `page.on('request')`.
+ */
 export async function serveBuild(
   options: { root?: () => string } = {},
-): Promise<{ origin: string; stop: () => Promise<void> }> {
+): Promise<{ origin: string; hits: string[]; stop: () => Promise<void> }> {
+  const hits: string[] = []
   const defaultRoot = fileURLToPath(new URL('../dist/', import.meta.url))
   const mime: Record<string, string> = {
     '.html': 'text/html',
@@ -20,6 +25,7 @@ export async function serveBuild(
   const server = createServer((request, response) => {
     void (async () => {
       const pathname = decodeURIComponent(new URL(request.url ?? '/', 'http://localhost').pathname)
+      hits.push(pathname)
       const root = options.root?.() ?? defaultRoot
       const file = resolve(root, `.${pathname === '/' ? '/index.html' : pathname}`)
       if (!file.startsWith(`${resolve(root)}${sep}`)) {
@@ -42,6 +48,7 @@ export async function serveBuild(
   let stopped = false
   return {
     origin: `http://127.0.0.1:${address.port}`,
+    hits,
     stop: async () => {
       if (stopped) return
       stopped = true

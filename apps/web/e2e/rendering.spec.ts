@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { answerCurrent, beginRun, CLASSIC, MCQ, openHome } from './helpers.js'
+import { lowContrast } from './scan.js'
 
 /**
  * Checks on what actually reaches the screen, as opposed to what the markup says.
@@ -118,72 +119,6 @@ test.describe('an interrupted run', () => {
 })
 
 test.describe('text contrast', () => {
-  /**
-   * Every run of visible text must clear WCAG AA against what is actually behind it:
-   * 4.5:1, or 3:1 once the text is large. The composed colour is what counts, so
-   * inherited opacity is folded in; a muted colour that passes on its own can fail
-   * once something dims it.
-   */
-  async function lowContrast(page: import('@playwright/test').Page): Promise<string[]> {
-    return page.evaluate(() => {
-      const parse = (c: string): [number, number, number, number] => {
-        const n = (c.match(/[\d.]+/g) ?? ['0', '0', '0']).map(Number)
-        return [n[0] ?? 0, n[1] ?? 0, n[2] ?? 0, n[3] === undefined ? 1 : n[3]]
-      }
-      const lum = ([r, g, b]: number[]) => {
-        const f = (v: number) => {
-          const x = (v ?? 0) / 255
-          return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4
-        }
-        return 0.2126 * f(r ?? 0) + 0.7152 * f(g ?? 0) + 0.0722 * f(b ?? 0)
-      }
-      const ratio = (a: number[], b: number[]) => {
-        const [l1, l2] = [lum(a), lum(b)]
-        return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05)
-      }
-      const over = (fg: number[], bg: number[], alpha: number) =>
-        [0, 1, 2].map((i) => (fg[i] ?? 0) * alpha + (bg[i] ?? 0) * (1 - alpha))
-
-      const backdrop = (el: Element): number[] => {
-        for (let e: Element | null = el; e; e = e.parentElement) {
-          const [r, g, b, a] = parse(getComputedStyle(e).backgroundColor)
-          if (a > 0) return [r, g, b]
-        }
-        return [255, 255, 255]
-      }
-      const inheritedOpacity = (el: Element): number => {
-        let o = 1
-        for (let e: Element | null = el; e; e = e.parentElement) o *= Number(getComputedStyle(e).opacity)
-        return o
-      }
-
-      const bad: string[] = []
-      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT)
-      for (let n = walker.nextNode(); n; n = walker.nextNode()) {
-        const text = (n.textContent ?? '').trim()
-        const el = n.parentElement
-        if (!text || !el || el.closest('.sr-only')) continue
-        // WCAG 1.4.3 exempts text in an inactive control, and looking inactive is the
-        // point of it, so a disabled toggle is allowed to sit below the threshold.
-        if (el.closest(':disabled, [aria-disabled="true"]')) continue
-        const s = getComputedStyle(el)
-        if (s.visibility === 'hidden' || s.display === 'none') continue
-        const box = el.getBoundingClientRect()
-        if (box.width === 0 || box.height === 0) continue
-        const alpha = inheritedOpacity(el)
-        if (alpha === 0) continue
-        const bg = backdrop(el)
-        const fg = over(parse(s.color).slice(0, 3), bg, alpha * (parse(s.color)[3] ?? 1))
-        const size = Number.parseFloat(s.fontSize)
-        const large = size >= 24 || (size >= 18.66 && Number(s.fontWeight) >= 700)
-        const need = large ? 3 : 4.5
-        const got = ratio(fg, bg)
-        if (got < need) bad.push(`${got.toFixed(2)}:1 (needs ${need}) ${size}px "${text.slice(0, 24)}"`)
-      }
-      return [...new Set(bad)]
-    })
-  }
-
   test('every run of text on the run screen clears AA', async ({ page }) => {
     await openHome(page, { profileRef: CLASSIC, mode: 'typed', seed: 7 })
     expect(await lowContrast(page)).toEqual([])

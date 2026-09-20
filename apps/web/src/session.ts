@@ -30,6 +30,7 @@ import { settings } from './adapters/settings.js'
 import { beep, vibrate } from './adapters/sound.js'
 import { resumeUpdates, suspendUpdates } from './adapters/sw.js'
 import { acquireWakeLock, reacquireWakeLock, releaseWakeLock } from './adapters/wakelock.js'
+import { abortPending } from './ui-state.js'
 
 /**
  * The session store: the reducer from `@80in8/core` plus the browser's clocks,
@@ -178,6 +179,9 @@ function react(previous: SessionState, next: SessionState, at: Clocks): void {
   }
 
   if (next.phase === 'finished') {
+    // A run can end by time while the "End this run?" question is still open. The
+    // question is moot then, and leaving it pending would swallow the results keys.
+    abortPending.value = false
     // The final answer and end reason also need synchronous protection until the
     // asynchronous history transaction commits.
     saveCheckpoint(next, at, currentPractice, startedAtWall)
@@ -234,19 +238,22 @@ async function finalise(state: Extract<SessionState, { phase: 'finished' }>): Pr
 /** What the polite live region is currently saying. */
 export const announceText = signal('')
 
-/** Announce the remaining time at the thresholds in §7.5, and beep at ten seconds. */
+/**
+ * Announce the remaining time at the thresholds in §7.5, and beep at ten seconds.
+ *
+ * Only the latest milestone that has been passed is spoken. After a sleep or a long
+ * spell in the background several may have gone by at once, and reading them all out
+ * in turn would tell the person "4 minutes remaining" with nine seconds on the clock.
+ */
 export function announcement(): string | null {
   const left = remaining.value
   if (left === null || session.value.phase !== 'running') return null
   const thresholds = [240_000, 120_000, 60_000, 30_000, 10_000]
-  for (const threshold of thresholds) {
-    if (left <= threshold && announcedAt !== threshold && (announcedAt < 0 || threshold < announcedAt)) {
-      announcedAt = threshold
-      if (threshold === 10_000 && settings.value.sound) beep(660, 120)
-      return `${formatSpoken(threshold)} remaining`
-    }
-  }
-  return null
+  const due = thresholds.filter((threshold) => left <= threshold).at(-1)
+  if (due === undefined || (announcedAt >= 0 && due >= announcedAt)) return null
+  announcedAt = due
+  if (due === 10_000 && settings.value.sound) beep(660, 120)
+  return `${formatSpoken(due)} remaining`
 }
 
 // Driven by the run loop through `remaining`, so the announcement lands on the clock
@@ -326,7 +333,11 @@ export function startRun(options: StartOptions): void {
   runError.value = null
   recovered.value = false
   finalisedAttempt = null
-  lastStart.value = options
+  abortPending.value = false
+  // Where to go and how long to count down belong to this start alone. A shared
+  // question opens in place with no countdown; "Again" from its results must not.
+  const { navigateTo: _navigateTo, countdownMs: _countdownMs, ...remembered } = options
+  lastStart.value = remembered
   currentPractice = options.practice
   feedback.value = null
 

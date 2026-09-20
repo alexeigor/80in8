@@ -240,6 +240,7 @@ export function SettingsScreen(): JSX.Element {
               type="file"
               accept="application/json,.json"
               class="sr-only"
+              aria-label="Import a JSON export"
               data-testid="settings-import-file"
               onChange={(event) => {
                 const chosen = event.currentTarget.files?.[0]

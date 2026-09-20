@@ -23,6 +23,7 @@ import {
 import { resolveProfile } from '../adapters/profiles.js'
 import { settings } from '../adapters/settings.js'
 import { Masthead } from '../components/Link.js'
+import { Scroller } from '../components/Scroller.js'
 import { labelOf } from '../labels.js'
 import { startRun } from '../session.js'
 import { showToast } from '../ui-state.js'
@@ -157,7 +158,7 @@ export function History(): JSX.Element {
             </div>
           ) : null}
 
-          <section class="scroller">
+          <Scroller label="Runs">
             <table data-testid="history-table">
               <thead>
                 <tr>
@@ -194,9 +195,9 @@ export function History(): JSX.Element {
                 ))}
               </tbody>
             </table>
-          </section>
+          </Scroller>
 
-          <section class="scroller stack">
+          <Scroller label="Accuracy by category" class="stack">
             <h2 class="small muted">Accuracy by category (last 20 runs)</h2>
             <table data-testid="kind-table">
               <thead>
@@ -220,7 +221,7 @@ export function History(): JSX.Element {
                 ))}
               </tbody>
             </table>
-          </section>
+          </Scroller>
 
           {weakest.length > 0 ? (
             <p class="muted small" data-testid="weakest">
@@ -261,6 +262,7 @@ export function History(): JSX.Element {
           type="file"
           accept="application/json,.json"
           class="sr-only"
+          aria-label="Import a JSON export"
           data-testid="import-file"
           onChange={(event) => {
             const chosen = event.currentTarget.files?.[0]

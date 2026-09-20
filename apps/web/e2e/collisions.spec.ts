@@ -1,5 +1,6 @@
-import { expect, type Page, test } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 import { answerCurrent, beginRun, CLASSIC, MCQ, openHome } from './helpers.js'
+import { expectNoCollisions } from './scan.js'
 
 /**
  * Nothing on screen may collide with anything else.
@@ -13,81 +14,6 @@ import { answerCurrent, beginRun, CLASSIC, MCQ, openHome } from './helpers.js'
  * written in `rem` grow with the root font instead of shrinking, and a `1fr` grid
  * column floors at min-content, so one long value pushed the whole grid off-screen.
  */
-async function scan(page: Page, label: string): Promise<string[]> {
-  const hits = await page.evaluate(() => {
-    const overlay = document.querySelector('[role="dialog"], .overlay')
-    const layerOf = (el: Element) => (overlay?.contains(el) ? 'modal' : 'page')
-    const shown = (el: Element) => {
-      if (el.closest('.sr-only')) return false
-      for (let e: Element | null = el; e; e = e.parentElement) {
-        const s = getComputedStyle(e)
-        if (s.display === 'none' || s.visibility === 'hidden' || Number(s.opacity) === 0) return false
-      }
-      return true
-    }
-
-    // Compare the ink, not the boxes. Two stacked blocks always touch; two runs of
-    // glyphs that touch are a visual collision.
-    type Ink = { r: DOMRect; el: Element; text: string }
-    const ink: Ink[] = []
-    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT)
-    for (let n = walker.nextNode(); n; n = walker.nextNode()) {
-      const text = (n.textContent ?? '').trim()
-      const el = n.parentElement
-      if (!text || !el || !shown(el)) continue
-      const range = document.createRange()
-      range.selectNodeContents(n)
-      for (const r of [...range.getClientRects()]) {
-        if (r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < window.innerHeight) {
-          ink.push({ r, el, text })
-        }
-      }
-    }
-
-    const name = (i: Ink) =>
-      `${i.el.tagName.toLowerCase()}${i.el.getAttribute('data-testid') ? `[${i.el.getAttribute('data-testid')}]` : ''}"${i.text.slice(0, 16)}"`
-
-    const out: string[] = []
-    for (let i = 0; i < ink.length; i++) {
-      const a = ink[i]
-      if (!a) continue
-      for (let j = i + 1; j < ink.length; j++) {
-        const b = ink[j]
-        if (!b) continue
-        if (a.el === b.el || a.el.contains(b.el) || b.el.contains(a.el)) continue
-        if (layerOf(a.el) !== layerOf(b.el)) continue
-        const ox = Math.min(a.r.right, b.r.right) - Math.max(a.r.left, b.r.left)
-        const oy = Math.min(a.r.bottom, b.r.bottom) - Math.max(a.r.top, b.r.top)
-        if (ox > 0.5 && oy > 0.5) {
-          out.push(`GLYPHS OVERLAP ${Math.round(ox)}x${Math.round(oy)}  ${name(a)}  ><  ${name(b)}`)
-        } else if (oy > 2 && ox > -4 && ox <= 0.5) {
-          out.push(`GLYPHS ${(-ox).toFixed(1)}px APART  ${name(a)}  |  ${name(b)}`)
-        }
-      }
-    }
-
-    // Text clipped by its own container.
-    for (const el of document.querySelectorAll('body *')) {
-      if (!shown(el)) continue
-      const s = getComputedStyle(el)
-      if (s.overflow === 'visible' || s.overflowX === 'auto' || s.overflowX === 'scroll') continue
-      if (el.scrollWidth > el.clientWidth + 1 && (el.textContent ?? '').trim())
-        out.push(
-          `CLIPPED ${el.scrollWidth - el.clientWidth}px  ${el.tagName.toLowerCase()}"${(el.textContent ?? '').trim().slice(0, 20)}"`,
-        )
-    }
-    return out
-  })
-  void label
-  return [...new Set(hits)]
-}
-
-/** Fails the test if the page reported anything, with the detail in the message. */
-async function expectNoCollisions(page: Page, label: string): Promise<void> {
-  const hits = await scan(page, label)
-  expect(hits, `${label}:\n${hits.join('\n')}`).toEqual([])
-}
-
 const HARD = 'hard@1'
 
 test.describe('on this device', () => {

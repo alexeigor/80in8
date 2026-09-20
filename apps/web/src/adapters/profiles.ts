@@ -76,12 +76,16 @@ export async function loadProfiles(): Promise<void> {
 }
 
 /**
- * A profile is "built in" only when it is byte-identical to a published preset; any
- * override makes it custom, which is what keeps question ids honest.
+ * A profile is "built in" when it asks a published preset's questions: the same id
+ * and version, and the same generative fields. Pacing, marking and the name may
+ * differ, because none of them changes a single question (§6.5); the untimed practice
+ * of the classic test is still the classic test, and its ids must say so, or it could
+ * never share statistics or a retry deck with the graded run. Anything that changes
+ * the questions — a count, a range, a mix — is custom.
  */
 export function isBuiltIn(profile: Profile): boolean {
   const preset = resolvePreset(`${profile.id}@${profile.version}`)
-  return preset !== undefined && canonicalJson(preset) === canonicalJson(profile)
+  return preset !== undefined && profileRefOf(preset, false) === profileRefOf(profile, false)
 }
 
 export function refOf(profile: Profile): string {

@@ -4,6 +4,7 @@ import { useEffect } from 'preact/hooks'
 import { navigate } from '../adapters/router.js'
 import { copyText, questionLink, runLink } from '../adapters/share.js'
 import { Link, Masthead } from '../components/Link.js'
+import { Scroller } from '../components/Scroller.js'
 import { Value } from '../components/Value.js'
 import { labelOf } from '../labels.js'
 import { again, recovered, retryMistakes, sameSeed, session } from '../session.js'
@@ -123,7 +124,7 @@ export function Results(): JSX.Element {
       </div>
 
       {summary.byKind.length > 0 ? (
-        <section class="scroller stack">
+        <Scroller label="Results by category" class="stack">
           <h2 class="small muted">By category</h2>
           <table data-testid="by-kind">
             <thead>
@@ -149,7 +150,7 @@ export function Results(): JSX.Element {
               ))}
             </tbody>
           </table>
-        </section>
+        </Scroller>
       ) : null}
 
       {summary.distractorSources.length > 0 ? (

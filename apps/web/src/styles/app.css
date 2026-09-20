@@ -138,6 +138,10 @@ p {
 }
 
 .wordmark {
+  /* A 44px target (N5). Not a flex box: flex items are read as separate words, and
+     the accessible name has to stay "80in8". */
+  display: inline-block;
+  line-height: 44px;
   text-decoration: none;
   font-family: var(--mono);
   font-size: 1.35rem;
@@ -153,6 +157,13 @@ p {
   display: flex;
   gap: var(--space-3);
   font-size: 0.9rem;
+}
+
+/* Navigation is a target, not prose, so it gets the 44px minimum (N5). */
+.navlinks a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }
 
 /* ------------------------------------------------------------------ controls */
@@ -187,8 +198,10 @@ button:disabled {
 }
 
 .primary kbd {
-  background: color-mix(in srgb, var(--accent-ink) 14%, transparent);
-  border-color: color-mix(in srgb, var(--accent-ink) 30%, transparent);
+  /* A dark wash, whatever the theme: lightening the green under white text (the
+     light theme) took the hint under 4.5:1. Darkening it helps in both. */
+  background: rgb(0 0 0 / 0.12);
+  border-color: rgb(0 0 0 / 0.25);
   color: var(--accent-ink);
 }
 
@@ -286,7 +299,7 @@ select {
   border: none;
   background: transparent;
   border-radius: 8px;
-  min-height: 38px;
+  min-height: 44px;
   padding: 6px 14px;
 }
 
@@ -992,7 +1005,10 @@ kbd {
   }
 }
 
-/* Landscape on a phone: put the input beside the question instead of under it. */
+/* Landscape on a phone: put the input beside the question instead of under it. The
+   question is sized by the short side of the screen, so it fits its half rather than
+   wrapping into itself, and the keypad becomes five columns with the submit key down
+   the right, which is what makes it fit under a 48px top bar on a 393px-high screen. */
 @media (orientation: landscape) and (max-height: 520px) {
   .run {
     grid-template-rows: auto minmax(0, 1fr);
@@ -1001,11 +1017,73 @@ kbd {
   .topbar {
     grid-column: 1 / -1;
   }
-  .question {
-    height: 100%;
+  .stage {
+    padding: 8px 12px;
   }
-  .options {
+  .question {
+    height: auto;
+    max-height: none;
+    font-size: clamp(20px, min(7.5vh, 3.6vw), 3rem);
+    line-height: 1.25;
+  }
+  .qid {
+    margin-top: 8px;
+  }
+  .inputarea {
+    gap: 6px;
+    padding-top: 6px;
+    justify-content: center;
+  }
+  input.answer {
+    min-height: 48px;
+    padding: 8px 12px;
+    font-size: clamp(18px, 4vh, 28px);
+  }
+  .keypad {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 6px;
+    max-width: none;
+  }
+  .keypad button {
+    min-height: 44px;
+    font-size: 1.05rem;
+  }
+  .keypad .full {
+    grid-column: 5;
+    grid-row: 1 / span 4;
+  }
+  /* Multiple choice: one column, with the options beside the question. */
+  .run[data-mode="mcq"] {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+  .run[data-mode="mcq"] .stage {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+  }
+  .run[data-mode="mcq"] .question {
+    flex: 1 1 40%;
+    width: auto;
+  }
+  .run[data-mode="mcq"] .options {
+    flex: 1 1 52%;
+    width: auto;
+    max-width: none;
+    margin: 0;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(56px, 1fr));
+    gap: 8px;
+  }
+  .run[data-mode="mcq"] .option {
+    min-height: 56px;
+  }
+  .run[data-mode="mcq"] .qid {
+    flex-basis: 100%;
+    margin-top: 0;
+  }
+  .run[data-mode="mcq"] .inputarea {
+    padding-top: 0;
   }
 }
 

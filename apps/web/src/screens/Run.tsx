@@ -117,6 +117,7 @@ function Live(): JSX.Element {
       // Without a keypad the field belongs just under the question; with one it
       // belongs in the thumb zone at the bottom.
       data-layout={mode === 'typed' && !keypad ? 'centred' : 'stage'}
+      data-mode={mode}
       ref={field}
       onPointerDown={(event) => {
         if (mode !== 'typed' || (event.target instanceof Element && event.target.closest('[role="dialog"]')))

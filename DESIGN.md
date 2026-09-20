@@ -488,7 +488,7 @@ Home / Config ──▶ Countdown (3·2·1, skippable on desktop) ──▶ Run 
 - `deadline = { mono: performance.now() + durationMs, wall: Date.now() + durationMs }` captured on `go`. Display driven by `requestAnimationFrame` while visible; a `setTimeout(tick, remaining % 1000 || 1000)` fallback keeps the reducer ticking when rAF is paused; `visibilitychange → visible`, `pageshow` and window `focus` each dispatch an immediate `tick` with both clocks so a run that expired during sleep finishes on the spot.
 - Display shows `m:ss`, turns amber at 60 s and red at 10 s (colour + a subtle weight change, not colour alone). No per-second sound by default; optional beep at 10 s.
 - Screen Wake Lock is requested on `go` and re-requested on visibility restore; failures are silent.
-- Polite `aria-live` region announces remaining time at 4:00, 2:00, 1:00, 0:30, 0:10 and the question text on change (the question box itself is `aria-live="polite"`).
+- Polite `aria-live` region announces remaining time at 4:00, 2:00, 1:00, 0:30, 0:10 and the question text on change (the question box itself is `aria-live="polite"`). After a suspend only the latest milestone passed is announced, never the whole backlog.
 
 ### 7.6 Mobile and layout details
 
@@ -527,7 +527,7 @@ One table, resolved by screen context; a key never has two meanings in the same 
 | Results | `S` | Same seed |
 | Results | `M` | Retry mistakes |
 | Results | `R` | Review |
-| Any | `?` | Show this table |
+| Any, outside a text field | `?` | Show this table |
 
 Keys not listed are ignored during a run (no browser shortcut is overridden except `/` in Typed mode, where `preventDefault` stops Firefox quick-find).
 
