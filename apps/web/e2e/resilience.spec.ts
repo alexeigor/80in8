@@ -116,3 +116,21 @@ test('Tab on results moves focus without starting another run', async ({ page })
   await page.keyboard.press('Enter')
   await expect(page.getByTestId('history')).toBeVisible()
 })
+
+/**
+ * A key pressed the instant a screen appears must reach the app. The global handlers
+ * are attached in a layout effect for this reason: a deferred effect attaches them
+ * after the first paint, leaving a gap where the home screen is on screen but nothing
+ * is listening, and Enter or '?' does nothing. The gap is a race, so this cannot fail
+ * on every engine every time — WebKit, the slowest to run effects, lost it reliably.
+ */
+test('a key pressed the instant the screen appears is not lost', async ({ page }) => {
+  await openHome(page)
+  await page.keyboard.press('?')
+  await expect(page.getByTestId('shortcuts')).toBeVisible({ timeout: 3000 })
+  await page.keyboard.press('Escape')
+
+  // Enter is the one that costs something: on the home screen it starts the run.
+  await page.keyboard.press('Enter')
+  await expect(page.getByTestId('countdown')).toBeVisible({ timeout: 3000 })
+})

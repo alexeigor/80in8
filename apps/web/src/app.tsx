@@ -1,5 +1,5 @@
 import type { JSX } from 'preact'
-import { useEffect } from 'preact/hooks'
+import { useLayoutEffect } from 'preact/hooks'
 import { navigate, path } from './adapters/router.js'
 import { applyUpdate, updateReady } from './adapters/sw.js'
 import { Link } from './components/Link.js'
@@ -218,7 +218,12 @@ function onPopState(): void {
 }
 
 export function App(): JSX.Element {
-  useEffect(() => {
+  // Laid out rather than deferred: a deferred effect attaches these after the first
+  // paint, so a key pressed the instant the screen appears — Enter on the home screen,
+  // say — lands before anything is listening and is silently lost. A layout effect
+  // runs in the same commit as the DOM, so nothing can be typed at a screen that is
+  // visible but not yet wired up.
+  useLayoutEffect(() => {
     addEventListener('keydown', handleKey)
     // Registered after the router's own listener, so `path` is already up to date.
     addEventListener('popstate', onPopState)
