@@ -48,3 +48,75 @@ describe('custom profile snapshots', () => {
     expect(resolveProfile(broken)).toBeUndefined()
   })
 })
+
+describe('links', () => {
+  it('a preset run link carries the seed and mode and no payload', async () => {
+    const { generateRun, PRESETS } = await import('@80in8/core')
+    const { runLink, questionLink, readSharedRun } = await import('./share.js')
+    const run = generateRun('a', 4242, PRESETS['optiver-classic'], 'mcq')
+    const link = new URL(runLink(run))
+    expect(link.origin).toBe(location.origin)
+    expect(link.pathname).toBe('/')
+    expect([...link.searchParams.entries()]).toEqual([
+      ['p', 'optiver-classic@1'],
+      ['s', '4242'],
+      ['m', 'mcq'],
+    ])
+    expect(readSharedRun(link.searchParams)).toEqual({
+      profile: PRESETS['optiver-classic'],
+      mode: 'mcq',
+      seed: 4242,
+    })
+
+    const first = run.questionIds[0] ?? ''
+    expect(questionLink(first)).toBe(`${location.origin}/q/${first}`)
+  })
+
+  it('a custom run link and question link carry the profile snapshot', async () => {
+    const { generateRun, PRESETS, generateRunFromIds } = await import('@80in8/core')
+    const { runLink, questionLink } = await import('./share.js')
+    const { encodeProfileParam, rememberProfile } = await import('./profiles.js')
+    const custom = { ...PRESETS['optiver-classic'], questionCount: 9 }
+    const ref = rememberProfile(custom)
+    const run = generateRun('a', 1, custom, 'typed', false)
+    expect(new URL(runLink(run)).searchParams.get('pf')).toBe(encodeProfileParam(custom))
+    const first = run.questionIds[0] ?? ''
+    expect(first.startsWith(`1.${ref}.`)).toBe(true)
+    expect(new URL(questionLink(first)).searchParams.get('pf')).toBe(encodeProfileParam(custom))
+
+    // A deck has no seed to share; the link is just the front door.
+    const deck = generateRunFromIds('b', run.questionIds, custom, 'typed', 'retry', false)
+    expect(runLink(deck)).toBe(`${location.origin}/`)
+    // An id that names a profile nobody here knows, or no valid id at all.
+    expect(questionLink('1.custom-00000000.int-add.0000000')).toBe(
+      `${location.origin}/q/1.custom-00000000.int-add.0000000`,
+    )
+    expect(questionLink('nonsense')).toBe(`${location.origin}/`)
+  })
+
+  it('reads a shared run leniently: no mode means the profile default, no seed means nothing', async () => {
+    const { PRESETS } = await import('@80in8/core')
+    const { readSharedRun } = await import('./share.js')
+    expect(readSharedRun(new URLSearchParams({ p: 'optiver-mcq@1', s: '7' }))?.mode).toBe('mcq')
+    expect(readSharedRun(new URLSearchParams({ p: 'optiver-mcq@1', s: 'seven' }))).toBeNull()
+    expect(readSharedRun(new URLSearchParams({ p: 'nobody@1', s: '7' }))).toBeNull()
+    expect(readSharedRun(new URLSearchParams({ s: '7' }))).toBeNull()
+    expect(readSharedRun(new URLSearchParams({ p: 'optiver-classic@1', s: '-1' }))?.seed).toBe(2 ** 32 - 1)
+    expect(readSharedRun(new URLSearchParams({ p: 'optiver-classic@1', s: '3', m: 'typed' }))?.profile).toBe(
+      PRESETS['optiver-classic'],
+    )
+  })
+
+  it('copyText reports whether the clipboard took it', async () => {
+    const { copyText } = await import('./share.js')
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    vi.stubGlobal('navigator', { clipboard: { writeText } })
+    expect(await copyText('hello')).toBe(true)
+    expect(writeText).toHaveBeenCalledWith('hello')
+    writeText.mockRejectedValue(new DOMException('Denied', 'NotAllowedError'))
+    expect(await copyText('hello')).toBe(false)
+    vi.stubGlobal('navigator', {})
+    expect(await copyText('hello')).toBe(false)
+    vi.unstubAllGlobals()
+  })
+})

@@ -35,7 +35,9 @@ beforeEach(() => {
 })
 
 afterEach(() => {
-  act(() => abortRun())
+  act(() => {
+    abortRun()
+  })
   cleanup()
   vi.useRealTimers()
 })

@@ -4,7 +4,7 @@
  * the tests representative rather than to make the code work.
  */
 
-if (!('matchMedia' in globalThis)) {
+if (typeof globalThis.matchMedia !== 'function') {
   Object.defineProperty(globalThis, 'matchMedia', {
     writable: true,
     value: (query: string) => ({
